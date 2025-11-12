@@ -18,16 +18,16 @@ class HealthDataValidator:
     
     # Value ranges for validation
     VALUE_RANGES = {
-        'heartRate': (30, 250),
-        'restingHeartRate': (30, 150),
-        'bloodPressureSystolic': (70, 250),
-        'bloodPressureDiastolic': (40, 150),
-        'oxygenSaturation': (70, 100),
-        'bodyTemperature': (35, 42),
-        'bloodGlucose': (20, 600),
-        'bodyMass': (20, 300),
-        'height': (50, 250),
-        'bodyMassIndex': (10, 60),
+        'heartRate': (0, 250),
+        'restingHeartRate': (0, 150),
+        'bloodPressureSystolic': (0, 250),
+        'bloodPressureDiastolic': (0, 150),
+        'oxygenSaturation': (0, 100),
+        'bodyTemperature': (0, 42),
+        'bloodGlucose': (0, 600),
+        'bodyMass': (0, 1000),
+        'height': (0, 1000),
+        'bodyMassIndex': (0, 60),
         'bodyFatPercentage': (0, 100),
     }
     

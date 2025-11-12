@@ -54,9 +54,6 @@ COPY --from=builder /app/.venv /app/.venv
 # Copy application code
 COPY . .
 
-# Copy schemas
-COPY ../schemas /app/schemas
-
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PATH="/app/.venv/bin:$PATH"

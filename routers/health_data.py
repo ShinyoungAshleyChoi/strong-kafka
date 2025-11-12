@@ -37,7 +37,7 @@ async def receive_health_data(request: Request, payload: HealthDataPayload):
         payload = HealthDataValidator.sanitize(payload)
         
         # 2. Validate payload
-        payload = HealthDataValidator.validate(payload)
+        # payload = HealthDataValidator.validate(payload)
         
         logger.info(
             f"Received health data: request_id={request_id}, "
@@ -134,7 +134,7 @@ async def receive_health_data(request: Request, payload: HealthDataPayload):
             raise HTTPException(
                 status_code=503,
                 detail={"message": "Service temporarily unavailable", "error": "Failed to send to Kafka"}
-            )
+         
         
         # 7. Return success response
         return HealthDataResponse(

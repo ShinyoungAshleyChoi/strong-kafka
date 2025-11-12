@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     # Logging
     log_level: str = "INFO"
     
+    # Schema Settings
+    schema_path: str = "./schemas/health-data.avsc"
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

@@ -1,7 +1,7 @@
 """
 Health data models
 """
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from datetime import datetime
 from pydantic import BaseModel, Field, field_validator
 
@@ -19,15 +19,27 @@ class HealthDataSample(BaseModel):
     isSynced: bool = Field(..., description="Sync status")
     createdAt: str = Field(..., description="Creation timestamp (ISO 8601)")
     
-    @field_validator('startDate', 'endDate', 'createdAt')
+    @field_validator('startDate', 'endDate', 'createdAt', mode='before')
     @classmethod
-    def validate_iso8601(cls, v: str) -> str:
-        """Validate ISO 8601 timestamp format"""
-        try:
-            datetime.fromisoformat(v.replace('Z', '+00:00'))
-            return v
-        except ValueError:
-            raise ValueError(f"Invalid ISO 8601 timestamp: {v}")
+    def validate_iso8601(cls, v: Union[str, int, float]) -> str:
+        """Validate and convert timestamp to ISO 8601 string format"""
+        # If it's a number (Unix timestamp), convert to ISO 8601 string
+        if isinstance(v, (int, float)):
+            try:
+                dt = datetime.fromtimestamp(v)
+                return dt.isoformat() + 'Z'
+            except (ValueError, OSError) as e:
+                raise ValueError(f"Invalid Unix timestamp: {v}")
+        
+        # If it's already a string, validate ISO 8601 format
+        if isinstance(v, str):
+            try:
+                datetime.fromisoformat(v.replace('Z', '+00:00'))
+                return v
+            except ValueError:
+                raise ValueError(f"Invalid ISO 8601 timestamp: {v}")
+        
+        raise ValueError(f"Timestamp must be string or number, got {type(v)}")
     
     @field_validator('type')
     @classmethod

@@ -25,8 +25,13 @@ class AvroConverter:
             schema_path: Path to Avro schema file
         """
         if schema_path is None:
-            # Default schema path
-            schema_path = Path(__file__).parent.parent.parent / "schemas" / "health-data.avsc"
+            # Try to get from config, fallback to relative path
+            try:
+                from config import settings
+                schema_path = settings.schema_path
+            except:
+                # Fallback for when config is not available
+                schema_path = Path(__file__).parent.parent.parent / "schemas" / "health-data.avsc"
         
         self.schema_path = Path(schema_path)
         self.schema = self._load_schema()
