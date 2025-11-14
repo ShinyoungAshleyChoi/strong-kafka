@@ -64,8 +64,8 @@ async def receive_health_data(request: Request, payload: HealthDataPayload):
             )
         
         # 4. Get or register schema with Schema Registry
+        subject = f"{settings.kafka_topic}-value"
         try:
-            subject = f"{settings.kafka_topic}-value"
             schema_info = await schema_registry_client.get_latest_schema(subject)
             schema_id = schema_info["id"]
             logger.debug(f"Using schema ID: {schema_id}")
@@ -134,6 +134,7 @@ async def receive_health_data(request: Request, payload: HealthDataPayload):
             raise HTTPException(
                 status_code=503,
                 detail={"message": "Service temporarily unavailable", "error": "Failed to send to Kafka"}
+            )
          
         
         # 7. Return success response
