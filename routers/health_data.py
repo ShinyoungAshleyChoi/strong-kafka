@@ -10,15 +10,11 @@ from validators.health_data_validator import HealthDataValidator, ValidationErro
 from converters.avro_converter import avro_converter, AvroConversionError
 from services.schema_registry import schema_registry_client, SchemaRegistryError
 from services.kafka_producer import kafka_producer_service, KafkaProducerError
-from services.dlq_handler import DLQHandler
 from config import settings
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/health-data", tags=["health-data"])
-
-# Initialize DLQ handler
-dlq_handler = DLQHandler(kafka_producer_service)
 
 
 @router.post("/", response_model=HealthDataResponse)
@@ -111,29 +107,13 @@ async def receive_health_data(request: Request, payload: HealthDataPayload):
         except KafkaProducerError as e:
             logger.error(f"Failed to send to Kafka after retries: {e}")
             
-            from services.metrics import kafka_messages_sent, kafka_producer_errors, dlq_messages
+            from services.metrics import kafka_messages_sent, kafka_producer_errors
             kafka_messages_sent.labels(topic=settings.kafka_topic, status="failed").inc()
             kafka_producer_errors.labels(error_type="KafkaProducerError").inc()
             
-            # Send to DLQ
-            await dlq_handler.send_to_dlq(
-                original_message=encoded_message,
-                error_type="KafkaProducerError",
-                error_message=str(e),
-                retry_count=3,
-                metadata={
-                    "request_id": request_id,
-                    "user_id": payload.userId,
-                    "device_id": payload.deviceId,
-                    "sample_count": len(payload.samples)
-                }
-            )
-            
-            dlq_messages.labels(error_type="KafkaProducerError").inc()
-            
             raise HTTPException(
-                status_code=503,
-                detail={"message": "Service temporarily unavailable", "error": "Failed to send to Kafka"}
+                status_code=500,
+                detail={"message": "Failed to send message to Kafka", "error": str(e)}
             )
          
         
